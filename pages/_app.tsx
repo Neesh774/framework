@@ -15,7 +15,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <>
-      <MetaTags title="Framework" />
+      <MetaTags
+        title="Framework"
+        description="Your online debate assistant."
+        image="/banner.png"
+      />
       <SessionContextProvider
         supabaseClient={supabase}
         initialSession={pageProps.initialSession}
