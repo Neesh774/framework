@@ -19,12 +19,11 @@ import {
   useColorMode,
   useToast,
 } from "@chakra-ui/react";
-import { useSession } from "@supabase/auth-helpers-react";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Moon, Sun } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import supabase from "../utils/supabase";
 
 export default function Nav({
   showRounds,
@@ -37,6 +36,7 @@ export default function Nav({
   const router = useRouter();
   const session = useSession();
   const toast = useToast();
+  const supabase = useSupabaseClient();
 
   return (
     <Flex width="full" paddingX="8" paddingY="2" justifyContent="space-between">
@@ -80,14 +80,49 @@ export default function Nav({
           icon={colorMode === "dark" ? <Sun /> : <Moon />}
         />
         {session && (
-          <Box rounded="full" width="fit" height="fit" overflow="hidden">
-            <Image
-              src={session.user.user_metadata["avatar_url"]}
-              alt="Avatar"
-              width="32"
-              height="32"
-            />
-          </Box>
+          <Menu>
+            <MenuButton>
+              <Box rounded="full" width="fit" height="fit" overflow="hidden">
+                <Image
+                  src={session.user.user_metadata["avatar_url"]}
+                  alt="Avatar"
+                  width="32"
+                  height="32"
+                />
+              </Box>
+            </MenuButton>
+            <MenuList>
+              <MenuItem
+                onClick={() => {
+                  router.push("/");
+                }}
+              >
+                All Cases
+              </MenuItem>
+              <MenuDivider />
+              <MenuItem
+                onClick={async () => {
+                  const { error } = await supabase.auth.signOut();
+                  if (error) {
+                    toast({
+                      title: "Error signing out.",
+                      status: "error",
+                      duration: 2000,
+                    });
+                  } else {
+                    toast({
+                      title: "Signed out!",
+                      status: "success",
+                      duration: 2000,
+                    });
+                    router.push("/");
+                  }
+                }}
+              >
+                Sign Out
+              </MenuItem>
+            </MenuList>
+          </Menu>
         )}
       </Flex>
     </Flex>
